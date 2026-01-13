@@ -1,0 +1,8 @@
+requests
+pytest
+python-dotenv
+boto3
+apache-airflow
+apache-airflow-providers-amazon
+apache-airflow-providers-snowflake
+apache-airflow-providers-discord

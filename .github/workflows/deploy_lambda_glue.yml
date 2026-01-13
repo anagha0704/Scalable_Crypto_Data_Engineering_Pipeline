@@ -1,0 +1,99 @@
+# This GitHub Actions workflow automates the deployment of AWS Lambda functions and AWS Glue jobs
+# for a cryptocurrency data pipeline project. The workflow is triggered on every push to the 'main'
+# branch. It performs the following steps:
+#
+# 1. Checks out the repository code.
+# 2. Sets up Python 3.10 environment.
+# 3. Installs required Python dependencies (requests, pytest, python-dotenv, boto3).
+# 4. Configures AWS CLI credentials using secrets stored in the repository.
+# 5. Runs specific pytest test functions related to AWS Lambda to ensure environment and code validity.
+# 6. Installs Lambda dependencies into the 'lambda_funcs' directory.
+# 7. Zips the Lambda function code and dependencies.
+# 8. Deploys the zipped package to the specified AWS Lambda function.
+# 9. Runs additional pytest test functions related to AWS Glue to verify S3 buckets and Glue job readiness.
+# 10. Uploads Glue ETL scripts to a designated S3 bucket for use by AWS Glue jobs.
+#
+# Environment variables such as COINGECKO_API_KEY and SNS_TOPIC_ARN are securely injected from GitHub secrets.
+# The workflow ensures that only tested and validated code is deployed to AWS Lambda and Glue, and that
+# all necessary scripts are available in S3 for Glue job execution.
+
+name: Deploy AWS Lambda Function and Glue Jobs
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+    - 'lambda_function/**'
+    - 'glue_jobs/**'
+    - 'dags/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
+      SNS_TOPIC_ARN: ${{ secrets.SNS_TOPIC_ARN }}
+
+    steps:
+    # Task 1: Checkout code
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Task 2: Set up Python
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    # Task 3: Install dependencies
+    - name: Install dependencies
+      run: pip install requests pytest python-dotenv boto3
+
+    # Task 4: Set up AWS CLI
+    - name: Set up AWS CLI
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    # Task 5: Run specific test functions related to AWS Lambda
+    - name: Run specific test functions related to AWS Lambda
+      run: |
+        pytest tests/test_main.py::test_coingecko_api_key
+        pytest tests/test_main.py::test_ping_coingecko
+        pytest tests/test_main.py::test_sns_alert_real
+        pytest tests/test_main.py::test_s3_buckets
+
+    # Task 6: Install dependencies for Lambda
+    - name: Install dependencies for Lambda
+      run: |
+        pip install requests pytest python-dotenv boto3 -t lambda_function
+
+    # Task 7: Zip Lambda function
+    - name: Zip Lambda function
+      run: cd lambda_function && zip -r ../function.zip ./*
+
+    # Task 8: Deploy to AWS Lambda
+    - name: Deploy to AWS Lambda
+      run: |
+        aws lambda update-function-code \
+          --function-name crypto_data_fetch \
+          --zip-file fileb://function.zip \
+          --region $AWS_REGION
+      env:
+        AWS_REGION: ${{ secrets.AWS_REGION }}
+
+    # Task 9: Run specific test functions related to AWS Glue
+    - name: Run specific test functions related to AWS glue
+      run: |
+        pytest tests/test_main.py::test_s3_buckets
+        pytest tests/test_main.py::test_glue_job_exists_and_is_runnable
+
+    # Task 10: Upload Glue Script to S3
+    - name: Upload Glue Script to S3
+      run: |
+        aws s3 cp glue_jobs/historical_data_transformation.py s3://aws-glue-assets-350681797086-us-east-2/scripts/
+        aws s3 cp glue_jobs/intra_day_transformation.py s3://aws-glue-assets-350681797086-us-east-2/scripts/

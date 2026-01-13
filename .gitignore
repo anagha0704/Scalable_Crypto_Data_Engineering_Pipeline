@@ -1,0 +1,19 @@
+# Secrets and local config
+.env
+__pycache__/
+*.py[cod]
+config
+
+# Virtual Environments
+venv/
+env/
+.venv/
+
+# Airflow specific
+airflow.db
+airflow-webserver.pid
+logs/
+
+# OS specific
+.DS_Store
+Thumbs.db
