@@ -9,7 +9,11 @@ The pipeline is architected to handle two distinct data frequencies, ensuring bo
 1. **Historical Data Pipeline:** This is a manual, one-time (or occasional) process designed to build your baseline dataset
 2. **Intra-day Data Pipeline:** It is automated, runs every 6 hours and only fetches the latest data.
 
-### Solution Stack
+## Architecture Diagram
+
+![Project Architecture](architecture_diagram.png)
+
+## Solution Stack
 
 | Component | Tool / Service |
 | :--- | :--- |
