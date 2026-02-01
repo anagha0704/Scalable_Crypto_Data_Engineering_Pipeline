@@ -1,8 +1,7 @@
 # Scalable Crypto Data Engineering Pipeline
 ## Project Overview
 
-This project implements an end-to-end data engineering pipeline designed to ingest, process, and analyze real-time cryptocurrency market data.
-The goal is to provide a robust infrastructure for tracking price fluctuations, trading volumes, and market sentiment across various crypto assets.
+End-to-end pipeline for ingesting, transforming, and storing real-time and historical cryptocurrency market data to enable reliable analytics and downstream workflows.
 
 ### Data Processing Streams
 The pipeline is architected to handle two distinct data frequencies, ensuring both deep historical context and real-time market awareness.
@@ -15,16 +14,13 @@ The pipeline is architected to handle two distinct data frequencies, ensuring bo
 
 ## Solution Stack
 
-| Component | Tool / Service |
-| :--- | :--- |
-| Data Ingestion | AWS Lambda |
-| Data Transformation | AWS Glue (PySpark) |
-| Storage | AWS S3 |
-| Data Warehouse | Snowflake |
-| Orchestration | Apache Airflow |
-| CI/CD / Devops | Github Actions, Docker |
-| Region Alignment | us-east-2 |
-| Alerts/Observability | AWS SNS |
+**Implemented architecture using**:
+* AWS Lambda for scalable ingestion of crypto market data
+* AWS Glue (PySpark) for structured transformation logic
+* S3 for durable data storage layers
+* Snowflake for warehousing and query-optimized storage
+* Apache Airflow to orchestrate workflows
+* GitHub Actions + Docker for automated testing and deployment
 
 ## Project Structure
 
@@ -56,11 +52,10 @@ Scalable_Crypto_Data_Engineering_Pipeline/
 
 ## Pipeline Workflow
 
-1. **Extract:** The pipeline triggers an API call to fetch the latest prices for cryptocurrencies.
-
-2. **Transform:** The JSON response is flattened, timestamps are normalized, and missing values are handled.
-
-3. **Load:** The structured data is appended to the historical price table in the database.
+**Pipeline stages**:
+1. **Extract**: Scheduled API calls retrieve fresh cryptocurrency prices from CoinGecko.
+2. **Transform**: JSON data is normalized, timestamped, cleansed, and structured for analytics.
+3. **Load**: Processed data is loaded incrementally into the historical price tables in Snowflake for efficient querying.
 
 ## S3 Structure
 
@@ -76,11 +71,11 @@ s3://crypto-transformed-data-0704/
 
 ## Testing
 
-* Unit tests for:
-    * API reachability (CoinGecko)
-    * S3 buckets existence
-    * Glue script validation
-    * SNS alerts
+**Automated tests include**:
+  * API reachability validation against CoinGecko
+  * Verification of required S3 bucket provisioning
+  * Sanity checks for Glue transformation scripts
+  * Alerts validation via AWS SNS
 
 ## Installation & Setup
 
@@ -98,10 +93,10 @@ Follow these high-level steps to replicate the environment and deploy the pipeli
 
 ### 2. AWS Infrastructure Setup
 
-1. CLI Configuration: Configure the AWS CLI with appropriate regional and access credentials.
-2. Storage (S3): Create raw and transformed data buckets for historical and intraday data.
-3. Identity & Access Management (IAM): Provision roles with specific permissions for Lambda and AWS Glue.
-4. Compute: Deploy the Lambda data-fetcher and upload PySpark scripts to the Glue environment.
+* CLI Configuration: Configure the AWS CLI with appropriate regional and access credentials.
+* Storage (S3): Create raw and transformed data buckets for historical and intraday data.
+* Identity & Access Management (IAM): Provision roles with specific permissions for Lambda and AWS Glue.
+* Compute: Deploy the Lambda data-fetcher and upload PySpark scripts to the Glue environment.
 
 ### 3. Snowflake Data Warehouse
 
